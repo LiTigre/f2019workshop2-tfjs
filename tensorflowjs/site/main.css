@@ -1,0 +1,12 @@
+body, button {
+  font-size: 30px;
+}
+canvas, img {
+  border-style: solid;
+  border-width: 1px;
+}
+
+#preprocessing-p5-div {
+  display: inline;
+  vertical-align: middle;
+}

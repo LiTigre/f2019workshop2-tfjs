@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> TensorFlow.js Demo </title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.1.2/dist/tf.min.js"></script>
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <h1> TensorFlow.js Demo! </h1>
+    <button
+      id="classification-tab-button"
+      style="font-weight: bold;"> classification </button>
+    <button id="autoencoder-tab-button"> autoencoder </button>
+    <div id="classification-div">
+      <div id="main-p5-div"></div>
+      <button id='clear-button'> Clear </button>
+      <span id='message-p'> Model loading... </span>
+      <div id="preprocessing-p5-div"> </div>
+      <img hidden id="preprocessing-p5-img" width="28" height="28">
+      <div id="preprocessed-p5-div"></div>
+    </div>
+    <div hidden id="autoencoder-div">
+      <div id="slider-div"> </div>
+      <canvas id="decoded-canvas" width="28" height="28"></canvas>
+      <img width="224" height="224" id="decoded-img">
+    </div>
+  </body>
+</html>
