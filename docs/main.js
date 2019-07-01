@@ -13,57 +13,27 @@ const encodingDimension = 20;
 let model;
 
 async function initPrediction() {
-  const classifier =
-    await tf.loadLayersModel('models/mnist_classifier/model.json');
-  const decoder = await tf.loadLayersModel('models/mnist_decoder/model.json');
-
-  setInterval(() =>{
-    if (mode === 'classifier') {
-      classifyDigit(classifier);
-    } else if (mode === 'autoencoder') {
-      decodeLatentVector(decoder);
-    }
-  }, 50);
+  // FILL OUT
 }
 
 async function classifyDigit(classifier) {
-  const input =
-    tf.browser.fromPixels(
-      document.querySelector('#preprocessing-p5-canvas'), 1);
-
-  const output = await classifier.predict(
-    rescaleCanvasToModel(input).reshape([1, 28, 28, 1])).argMax(1).data();
-
-  document.querySelector('#message-p').innerHTML =
-    'Model predicts ' + output[0];
+  // FILL OUT
 }
 
 async function decodeLatentVector(decoder) {
-  const input = getSliderTensor();
-  const output = rescaleModelToCanvas(
-    decoder.predict(input).reshape([28, 28]));
-  await tf.browser.toPixels(output, document.querySelector('#decoded-canvas'));
-  const dataURL = document.querySelector('#decoded-canvas').toDataURL();
-  const img = new Image();
-  img.src = dataURL;
-  img.onload = () => {
-    ctx = document.querySelector('#larger-decoded-canvas').getContext('2d');
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(img, 0, 0, side, side, 0, 0, canvasWidth, canvasHeight);
-  };
+  // FILL OUT
 }
 
 function rescaleCanvasToModel(value) {
-  return value.mul(-1/255).add(1);
+  // FILL OUT
 }
 
 function rescaleModelToCanvas(value) {
-  return value.sub(1).mul(-255).toInt();
+  // FILL OUT
 }
 
 function getSliderTensor() {
-  return tf.tensor(sliders.map(slider =>
-    parseFloat(slider.value))).reshape([1, -1]);
+  // FILL OUT
 }
 
 function generateSliders() {
