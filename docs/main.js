@@ -7,10 +7,51 @@ let currentStroke = [];
 
 let sliders = [];
 
-let mode = 'classification';
+let mode = 'classifier';
 const encodingDimension = 20;
 
 let model;
+
+async function initPrediction() {
+  const classifier =
+    await tf.loadLayersModel('models/mnist_classifier/model.json');
+  const decoder = await tf.loadLayersModel('models/mnist_decoder/model.json');
+
+  setInterval(() =>{
+    if (mode === 'classifier') {
+      classifyDigit(classifier);
+    } else if (mode === 'autoencoder') {
+      decodeLatentVector(decoder);
+    }
+  }, 50);
+}
+
+async function classifyDigit(classifier) {
+  const input =
+    tf.browser.fromPixels(
+      document.querySelector('#preprocessing-p5-canvas'), 1);
+
+  const output = await classifier.predict(
+    rescaleCanvasToModel(input).reshape([1, 28, 28, 1])).argMax(1).data();
+
+  document.querySelector('#message-p').innerHTML =
+    'Model predicts ' + output[0];
+}
+
+async function decodeLatentVector(decoder) {
+  const input = getSliderTensor();
+  const output = rescaleModelToCanvas(
+    decoder.predict(input).reshape([28, 28]));
+  await tf.browser.toPixels(output, document.querySelector('#decoded-canvas'));
+  const dataURL = document.querySelector('#decoded-canvas').toDataURL();
+  const img = new Image();
+  img.src = dataURL;
+  img.onload = () => {
+    ctx = document.querySelector('#larger-decoded-canvas').getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, 0, 0, side, side, 0, 0, canvasWidth, canvasHeight);
+  };
+}
 
 function rescaleCanvasToModel(value) {
   return value.mul(-1/255).add(1);
@@ -21,7 +62,8 @@ function rescaleModelToCanvas(value) {
 }
 
 function getSliderTensor() {
-  return tf.tensor(sliders.map(slider => parseFloat(slider.value))).reshape([1, -1]);
+  return tf.tensor(sliders.map(slider =>
+    parseFloat(slider.value))).reshape([1, -1]);
 }
 
 function generateSliders() {
@@ -31,39 +73,9 @@ function generateSliders() {
     sliderDiv.innerHTML +=
       `<input id="slider${i}" type="range" min="0" max="1" step="any">`
   }
-  for (let i = 0; i < encodingDimension; i++) { //encoding_dimension; i++) {
+  for (let i = 0; i < encodingDimension; i++) {
     sliders.push(document.querySelector(`#slider${i}`));
   }
-}
-
-async function initPrediction() {
-  const classifier = await tf.loadLayersModel('models/mnist_classifier/model.json');
-  const decoder = await tf.loadLayersModel('models/mnist_decoder/model.json');
-
-  setInterval(async () => {
-    if (mode === 'autoencoder') {
-      const input = getSliderTensor();
-      const output = await rescaleModelToCanvas(
-        decoder.predict(input).reshape([28, 28]));
-      tf.browser.toPixels(output, document.querySelector('#decoded-canvas'));
-      const dataURL = document.querySelector('#decoded-canvas').toDataURL();
-      const img = document.querySelector('#decoded-img');
-      img.src = dataURL;
-    }
-  }, 200);
-
-  setInterval(async () => {
-    if (mode === 'classification') {
-      const input =
-        tf.browser.fromPixels(document.querySelector('#preprocessing-p5-canvas'), 1);
-
-      const output = await classifier.predict(
-        rescaleCanvasToModel(input).reshape([1, 28, 28, 1])).argMax(1).data();
-      document.querySelector('#message-p').innerHTML =
-        'Model predicts ' + output[0];
-    }
-  }, 200);
-
 }
 
 let mainP5Sketch = new p5(sketch => {
@@ -74,11 +86,12 @@ let mainP5Sketch = new p5(sketch => {
   }
 
   sketch.draw = () => {
-    if (mode === 'classification') {
+    if (mode === 'classifier') {
       if (sketch.mouseIsPressed) {
         if (sketch.mouseX > 0 && sketch.mouseX < canvasWidth &&
           sketch.mouseY > 0 && sketch.mouseY < canvasHeight) {
-          sketch.line(sketch.pmouseX, sketch.pmouseY, sketch.mouseX, sketch.mouseY);
+          sketch.line(sketch.pmouseX, sketch.pmouseY,
+            sketch.mouseX, sketch.mouseY);
           currentStroke.push([sketch.mouseX, sketch.mouseY]);
         } else if (currentStroke.length > 1) {
           strokes.push(currentStroke);
@@ -94,7 +107,6 @@ let mainP5Sketch = new p5(sketch => {
       currentStroke = [];
     }
   }
-
 }, 'main-p5-div');
 
 let preprocessingP5Sketch = new p5(sketch => {
@@ -105,7 +117,8 @@ let preprocessingP5Sketch = new p5(sketch => {
   }
 
   sketch.draw = () => {
-    const allStrokes = strokes.concat(currentStroke.length > 0 ? [currentStroke] : []);
+    const allStrokes =
+      strokes.concat(currentStroke.length > 0 ? [currentStroke] : []);
     const [xs, ys] = [0,1].map(i =>
       allStrokes.reduce((acc, cur) => acc.concat(cur.map(p => p[i])), [])
     );
@@ -138,7 +151,8 @@ let preprocessingP5Sketch = new p5(sketch => {
       ));
     }
 
-    const dataURL = document.querySelector('#preprocessing-p5-canvas').toDataURL();
+    const dataURL =
+      document.querySelector('#preprocessing-p5-canvas').toDataURL();
     document.querySelector('#preprocessing-p5-img').src = dataURL;
   }
 }, 'preprocessing-p5-div');
@@ -167,25 +181,29 @@ window.onload = () => {
   }
 
   // Tab switching logic
-  const classificationTabButton = document.querySelector('#classification-tab-button');
+  const classifierTabButton = document.querySelector('#classifier-tab-button');
   const autoencoderTabButton = document.querySelector('#autoencoder-tab-button');
-  const classificationDiv = document.querySelector('#classification-div');
+  const classifierDiv = document.querySelector('#classifier-div');
   const autoencoderDiv = document.querySelector('#autoencoder-div');
 
-  classificationTabButton.onclick = () => {
-    classificationTabButton.style.fontWeight = 'bold';
+  classifierTabButton.onclick = () => {
+    classifierTabButton.style.fontWeight = 'bold';
     autoencoderTabButton.style.fontWeight = 'normal';
-    classificationDiv.style.display = 'block';
+    classifierDiv.style.display = 'block';
     autoencoderDiv.style.display = 'none';
-    mode = 'classification';
+    mode = 'classifier';
   }
   autoencoderTabButton.onclick = () => {
-    classificationTabButton.style.fontWeight = 'normal';
+    classifierTabButton.style.fontWeight = 'normal';
     autoencoderTabButton.style.fontWeight = 'bold';
-    classificationDiv.style.display = 'none';
+    classifierDiv.style.display = 'none';
     autoencoderDiv.style.display = 'block';
     mode = 'autoencoder';
   }
+
+  const largerDecodedCanvas = document.querySelector('#larger-decoded-canvas');
+  largerDecodedCanvas.width = canvasWidth;
+  largerDecodedCanvas.height = canvasHeight;
 
   generateSliders()
   initPrediction()

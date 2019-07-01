@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<DOCTYPE html>
 <html>
   <head>
     <title> TensorFlow.js Demo </title>
@@ -9,11 +9,13 @@
   </head>
   <body>
     <h1> TensorFlow.js Demo! </h1>
-    <button
-      id="classification-tab-button"
-      style="font-weight: bold;"> classification </button>
-    <button id="autoencoder-tab-button"> autoencoder </button>
-    <div id="classification-div">
+    <button id="classifier-tab-button" style="font-weight: bold; width: 500;">
+      Classifier
+    </button>
+    <button id="autoencoder-tab-button" style="width: 500;">
+      Autoencoder
+    </button>
+    <div id="classifier-div">
       <div id="main-p5-div"></div>
       <button id='clear-button'> Clear </button>
       <span id='message-p'> Model loading... </span>
@@ -24,7 +26,7 @@
     <div hidden id="autoencoder-div">
       <div id="slider-div"> </div>
       <canvas id="decoded-canvas" width="28" height="28"></canvas>
-      <img width="224" height="224" id="decoded-img">
+      <canvas id="larger-decoded-canvas"></canvas>
     </div>
   </body>
 </html>
