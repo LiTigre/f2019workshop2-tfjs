@@ -7,7 +7,7 @@ Alternatively, the slides and notebook files can be found in the repository.
 
 # Folder Structure
 ```
-├── docs                                      # Website root directory
+├── docs                                      # TensorFlow.js demo Website root directory
 │   ├── index.html
 │   ├── main.css
 │   ├── main.js
